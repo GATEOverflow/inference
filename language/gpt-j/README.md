@@ -1,5 +1,7 @@
 # GPT-J Reference Implementation
 
+Please see [this readme](README_cm.md) file for an automated way to run this benchmark out of the box and do an end-to-end submission with or without docker using the [MLCommons CM](https://github.com/mlcommons/ck/tree/master/cm) language.
+
 ### Setup Instructions
 
 ```bash
@@ -38,6 +40,7 @@ Build:
 cd mlperf_inference/loadgen
 CFLAGS="-std=c++14 -O3" python setup.py bdist_wheel
 cd ..; pip install --force-reinstall loadgen/dist/`ls -r loadgen/dist/ | head -n1` ; cd -
+cp ../mlperf.conf ../../
 cd ../..
 ```
 ### Clone 
@@ -65,7 +68,11 @@ pip install datasets
 python prepare-calibration.py --calibration-list-file calibration-list.txt --output-dir </path/to/output-folder>
 ```
 ### Download GPT-J model
-Please download the internal fine-tuned GPT-J checkpoint and rename it as model/. The download_gptj.py only downloads the default huggingface model which is not fine-tuned on CNN-Daily mail dataset.
+Please download the fine-tuned GPT-J checkpoint from [here](https://cloud.mlcommons.org/index.php/s/QAZ2oM94MkFtbQx) and extract it as model/. The download_gptj.py only downloads the default huggingface model which is not fine-tuned on CNN-Daily mail dataset. 
+
+```
+wget https://cloud.mlcommons.org/index.php/s/QAZ2oM94MkFtbQx/download --output-document checkpoint.zip
+```
 
 ### Running the Benchmark
 Replace the model and dataset path arguments with your corresponding paths. For evaluating the ROUGE score after the run, include --accuracy as shown below. For user specific target qps, please include user.conf.
@@ -73,7 +80,7 @@ Replace the model and dataset path arguments with your corresponding paths. For 
 python main.py --scenario=[Offline | Server | SingleStream] --model-path=./model/ --dataset-path=./data/cnn_eval.json [--accuracy] --max_examples=[Maximum number of examples to consider] [--gpu]
 ```
 ### Evaluate accuracy run 
-Evaluates the ROGUE scores from the accuracy logs. Only applicable when specifiying [--accuracy] while running main.py
+Evaluates the ROGUE scores from the accuracy logs. Only applicable when specifying [--accuracy] while running main.py
 ```
 python evaluation.py --mlperf-accuracy-file ./build/logs/mlperf_log_accuracy.json --dataset-file ./data/cnn_eval.json
 ```

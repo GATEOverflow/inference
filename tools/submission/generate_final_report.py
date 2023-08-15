@@ -14,8 +14,8 @@ def get_args():
   """Parse commandline."""
   parser = argparse.ArgumentParser()
   parser.add_argument('--input', required=True, help='results csv from checker')
-  parser.add_argument('--version', default='3.0', help='mlperf version')
-  parser.add_argument('--repository', default='submissions_inference_3.0', help='mlperf repository')
+  parser.add_argument('--version', default='3.1', help='mlperf version')
+  parser.add_argument('--repository', default='submissions_inference_3.1', help='mlperf repository')
   args = parser.parse_args()
   return args
 
@@ -103,7 +103,8 @@ def main():
   columns_order = [['Result'],
                    [
                        'resnet', 'retinanet', '3d-unet-99', '3d-unet-99.9',
-                       'rnnt', 'bert-99', 'bert-99.9', 'dlrm-99', 'dlrm-99.9'
+                       'rnnt', 'bert-99', 'bert-99.9', 'dlrm-v2-99', 'dlrm-v2-99.9',
+                       'gptj-99', 'gptj-99.9'
                    ], ['SingleStream', 'MultiStream', 'Server', 'Offline'],
                    [
                        'Latency (ms)',
@@ -120,10 +121,12 @@ def main():
           'rnnt': ['Server', 'Offline'],
           'bert-99': ['Server', 'Offline'],
           'bert-99.9': ['Server', 'Offline'],
-          'dlrm-99': ['Server', 'Offline'],
-          'dlrm-99.9': ['Server', 'Offline'],
+          'dlrm-v2-99': ['Server', 'Offline'],
+          'dlrm-v2-99.9': ['Server', 'Offline'],
           '3d-unet-99': ['Offline'],
           '3d-unet-99.9': ['Offline'],
+          'gptj-99': ['Server', 'Offline'],
+          'gptj-99.9': ['Server', 'Offline'],
       },
       'edge': {
           'resnet': ['SingleStream', 'MultiStream', 'Offline'],
@@ -135,6 +138,7 @@ def main():
           'dlrm-99.9': [],
           '3d-unet-99': ['SingleStream', 'Offline'],
           '3d-unet-99.9': ['SingleStream', 'Offline'],
+          'gptj-99': ['SingleStream', 'Offline'],
       }
   }
 
