@@ -111,6 +111,8 @@ def define_env(env):
                         content += mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), "Offline", device.lower(), "test", test_query_count, True).replace("--docker ","")
                         content += f"{cur_space3}The above command should do a test run of Offline scenario and record the estimated offline_target_qps.\n\n"
                       else: # Docker implementation steps
+                        docker_info = get_docker_info(spaces+16, model, implementation, device)
+                        content += docker_info
                         content += mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), "Offline", device.lower(), "test", test_query_count, True)
                         content += f"{cur_space3}The above command should get you to an interactive shell inside the docker container and do a quick test run for the Offline scenario. Once inside the docker container please do the below commands to do the accuracy + performance runs for each scenario.\n\n"
                         content += f"{cur_space3}<details>\n"
@@ -139,10 +141,11 @@ def define_env(env):
                       content += run_suffix
                 else:
                     content += f"{cur_space2}Use the same docker container as for the {model.replace('99.9', '99')} model.\n\n"
+        readme_prefix = get_readme_prefix(spaces, model, implementation)
 
         readme_suffix = get_readme_suffix(spaces, model, implementation)
 
-        return content + readme_suffix
+        return readme_prefix + content + readme_suffix
 
     def get_test_query_count(model, implementation, device, num_devices=1):
 
@@ -158,27 +161,58 @@ def define_env(env):
             p_range *= num_devices
 
         return p_range
+    
+    def get_readme_prefix(spaces, model, implementation):
+      readme_prefix = ""
+      pre_space="    "
+      #for i in range(1,spaces):
+      #     pre_space  = pre_space + " "
+      #pre_space += "  "
+
+      return readme_prefix
+
+    def get_docker_info(spaces, model, implementation, device):
+      info = ""
+      pre_space=""
+      for i in range(1,spaces):
+        pre_space  = pre_space + " "
+      pre_space += " "
+      #pre_space = "                "
+      if implementation == "nvidia":
+        info += f"\n{pre_space}!!! tip\n\n"
+        info+= f"{pre_space}    All the Nvidia benchmarks use the same docker container. So, if you have already done the docker setup command for any benchmark, you can skip the docker setup command below and do the Run commands inside the already built docker container.\n\n"
+      return info
+    
     def get_venv_command(spaces):
-     pre_space = " "*spaces
-     return f"""\n
+      pre_space = " "*spaces
+      return f"""\n
 {pre_space}```bash
 {pre_space}cm run script --tags=\"install python-venv\" --name=mlperf
 {pre_space}export CM_SCRIPT_EXTRA_CMD=\"--adr.python.name=mlperf\"
 {pre_space}```\n"""   
 
     def get_readme_suffix(spaces, model, implementation):
-        readme_suffix = ""
-        pre_space=""
-        for i in range(1,spaces):
-             pre_space  = pre_space + " "
-        pre_space += "  "
+      readme_suffix = ""
+      pre_space=""
+      for i in range(1,spaces):
+        pre_space  = pre_space + " "
+      pre_space += "  "
 
-        if implementation == "reference":
-            model_base_name = model.replace("-99.9","").replace("-99","")
-            readme_suffix+= f"{pre_space}* If you want to download the official MLPerf model and dataset for {model} you can follow [this README](get-{model_base_name}-data.md).\n"
-            if model == "resnet50":
-                 readme_suffix += f"{pre_space}* Please see [mobilenets.md](mobilenets.md) for running mobilenet models for Image Classification."
+      if implementation == "reference":
+        model_base_name = model.replace("-99.9","").replace("-99","")
+        readme_suffix+= f"{pre_space}* If you want to download the official MLPerf model and dataset for {model} you can follow [this README](get-{model_base_name}-data.md).\n"
+        if model == "resnet50":
+          readme_suffix += f"{pre_space}* Please see [mobilenets.md](mobilenets.md) for running mobilenet models for Image Classification."
         return readme_suffix
+    
+    def get_run_cmd_extra(f_pre_space, model, implementation, device):
+      extra_content = ""
+      f_pre_space += " "
+      if "gptj" in model and device == "cuda" and implementation == "reference":
+        extra_content += f"{f_pre_space}!!! tip\n\n"
+        extra_content += f"{f_pre_space}    * `--precision=[float16|bfloat16]` can help run on GPUs with less RAM \n"
+        extra_content += f"{f_pre_space}    * `--beam-size=1` Beam size of 4 is mandatory for a closed division submission but reducing the beam size can help in running the model on GPUs with lower device memory\n"
+      return extra_content
 
 
     @env.macro
@@ -195,6 +229,8 @@ def define_env(env):
         else:
             scenario_variation_tag = ""
             scenario_option = f"\\\n {pre_space} --scenario={scenario}"
+        
+        run_cmd_extra = get_run_cmd_extra(f_pre_space, model, implementation, device)
 
         if docker:
             docker_cmd_suffix = f" \\\n {pre_space} --docker --quiet"
@@ -202,7 +238,7 @@ def define_env(env):
 
             docker_setup_cmd = f"\n{f_pre_space} ```bash\n{f_pre_space} cm run script --tags=run-mlperf,inference,_find-performance,_full{scenario_variation_tag} \\\n {pre_space} --model={model} \\\n {pre_space} --implementation={implementation} \\\n {pre_space} --framework={framework} \\\n {pre_space} --category={category} {scenario_option} \\\n {pre_space} --execution-mode=test \\\n {pre_space} --device={device} {docker_cmd_suffix}\n{f_pre_space} ```\n"
 
-            return docker_setup_cmd
+            return docker_setup_cmd + run_cmd_extra
 
         else:
             cmd_suffix = f"\\\n {pre_space} --quiet"
@@ -212,4 +248,4 @@ def define_env(env):
 
             run_cmd = f"\n{f_pre_space} ```bash\n{f_pre_space} cm run script --tags=run-mlperf,inference{scenario_variation_tag} \\\n {pre_space} --model={model} \\\n {pre_space} --implementation={implementation} \\\n {pre_space} --framework={framework} \\\n {pre_space} --category={category} {scenario_option} \\\n {pre_space} --execution-mode={execution_mode} \\\n {pre_space} --device={device} {cmd_suffix}\n{f_pre_space} ```\n"
 
-            return run_cmd
+            return run_cmd + run_cmd_extra
