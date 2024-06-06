@@ -11,6 +11,7 @@ def define_env(env):
 
         content=""
         scenarios = []
+        execution_envs = ["Docker","Native"]
 
         if implementation == "reference":
             devices = [ "CPU", "CUDA", "ROCm" ]
@@ -24,7 +25,7 @@ def define_env(env):
                  frameworks = [ "Pytorch" ]
 
         elif implementation == "nvidia":
-            if model in [ "sdxl", "llama2-99", "llama2-99.9" ]:
+            if model in [ "sdxl", "llama2-70b-99", "llama2-70b-99.9" ]:
                  return pre_space+"    WIP"
             devices = [ "CUDA" ]
             frameworks = [ "TensorRT" ]
@@ -62,22 +63,24 @@ def define_env(env):
             categories = [ "Edge", "Datacenter" ]
 
         for category in categories:
-            if category == "Edge" and not scenarios:
-                 scenarios = [ "Offline", "SingleStream" ]
-            if model.lower() in [ "resnet50", "retinanet" ]:
-                 scenarios.append("MultiStream")
-            elif category == "Datacenter" and not scenarios:
-                 scenarios = [ "Offline", "Server" ] 
+          if category == "Edge" and not scenarios:
+            scenarios = [ "Offline", "SingleStream" ]
+          if model.lower() in [ "resnet50", "retinanet" ] and not "MultiStream" in scenarios:
+            scenarios.append("MultiStream")
+          elif category == "Datacenter" and not scenarios:
+            scenarios = [ "Offline", "Server" ] 
+          if "99.9" in model:
+            return f"\n{pre_space}Follow the same procedure described in {model.split('.')[0]}. Change the `--model` tag value to `{model.lower()}`."
+          else:
+            print(model)
+          content += f"{pre_space}=== \"{category.lower()}\"\n\n"
 
-        content += f"{pre_space}=== \"{category.lower()}\"\n\n"
+          cur_space = pre_space + "    "
+          scenarios_string = ", ".join(scenarios)
 
-        cur_space = pre_space + "    "
-        scenarios_string = ", ".join(scenarios)
+          content += f"{cur_space}#### {category} category \n\n{cur_space} In the {category.lower()} category, {model} has {scenarios_string} scenarios and all the scenarios are mandatory for a closed division submission.\n\n"
 
-        content += f"{cur_space}#### {category} category \n\n{cur_space} In the {category.lower()} category, {model} has {scenarios_string} scenarios and all the scenarios are mandatory for a closed division submission.\n\n"
-
-
-        for framework in frameworks:
+          for framework in frameworks:
             cur_space1 = cur_space + "    "
             content += f"{cur_space}=== \"{framework}\"\n"
             content += f"{cur_space1}##### {framework} framework\n\n"
@@ -87,43 +90,55 @@ def define_env(env):
                     if device.lower() != "cpu":
                          continue
                 cur_space2 = cur_space1 + "    "
+                cur_space3 = cur_space2 + "    "
+                cur_space4 = cur_space3 + "    "
                 content += f"{cur_space1}=== \"{device}\"\n"
                 content += f"{cur_space2}###### {device} device\n\n"
-
                 if "99.9" not in model: #not showing docker command as it is already done for the 99% variant
-                    content += f"{cur_space2}###### Docker Setup Command\n\n"
-                    test_query_count=get_test_query_count(model, implementation, device)
+                    # to select the execution environments(currently Docker and Native)
+                    for execution_env in execution_envs:
+                      if (device == "ROCm" or implementation == "qualcomm") and execution_env == "Docker":
+                        continue  # docker not currently supported for Qualcomm implementation and ROCm device
+                      if implementation == "nvidia" and execution_env == "Native":
+                        continue  # Nvidia implementation only supports execution through docker
+                      content += f"{cur_space2}=== \"{execution_env}\"\n"
+                      content += f"{cur_space3}###### {execution_env} Environment\n\n"
+                      test_query_count=get_test_query_count(model, implementation, device)
+                      if execution_env == "Native": # Native implementation steps through virtual environment
+                        content += f"{cur_space3}##### Setup a virtual environment for Python\n"
+                        content += get_venv_command(spaces+16)
+                        content += f"{cur_space3}##### Execute the CM command\n"
+                        content += mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), "Offline", device.lower(), "test", test_query_count, True).replace("--docker ","")
+                        content += f"{cur_space3}The above command should do a test run of Offline scenario and record the estimated offline_target_qps.\n\n"
+                      else: # Docker implementation steps
+                        content += mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), "Offline", device.lower(), "test", test_query_count, True)
+                        content += f"{cur_space3}The above command should get you to an interactive shell inside the docker container and do a quick test run for the Offline scenario. Once inside the docker container please do the below commands to do the accuracy + performance runs for each scenario.\n\n"
+                        content += f"{cur_space3}<details>\n"
+                        content += f"{cur_space3}<summary> Please click here to see more options for the docker launch </summary>\n\n"
+                        content += f"{cur_space3}* `--docker_cm_repo <Custom CM repo URL>`: to use a custom fork of cm4mlops repository inside the docker image\n\n"
+                        content += f"{cur_space3}* `--docker_cache=no`: to not use docker cache during the image build\n"
 
-                    content += mlperf_inference_run_command(spaces+12, model, implementation, framework.lower(), category.lower(), "Offline", device.lower(), "test", test_query_count, True)
-                    content += f"{cur_space2}The above command should get you to an interactive shell inside the docker container and do a quick test run for the Offline scenario. Once inside the docker container please do the below commands to do the accuracy + performance runs for each scenario.\n\n"
-                    content += f"{cur_space2}<details>\n"
-                    content += f"{cur_space2}<summary> Please click here to see more options for the docker launch </summary>\n\n"
-                    content += f"{cur_space2}* `--docker_cm_repo <Custom CM repo URL>`: to use a custom fork of cm4mlops repository inside the docker image\n\n"
-                    content += f"{cur_space2}* `--docker_cache=no`: to not use docker cache during the image build\n"
+                        if device.lower() not in [ "cuda" ]:
+                          content += f"{cur_space3}* `--docker_os=ubuntu`: ubuntu and rhel are supported. \n"
+                          content += f"{cur_space3}* `--docker_os_version=20.04`: [20.04, 22.04] are supported for Ubuntu and [8, 9] for RHEL\n"
+
+                        content += f"{cur_space3}</details>\n"
+                      run_suffix = ""
+                      run_suffix += f"\n{cur_space3}    ###### Run Options\n\n"
+                      run_suffix += f"{cur_space3}     * Use `--division=closed` to do a closed division submission which includes compliance runs\n\n"
+                      run_suffix += f"{cur_space3}     * Use `--rerun` to do a rerun even when a valid run exists\n\n"  
+
+                      for scenario in scenarios:
+                        content += f"{cur_space3}=== \"{scenario}\"\n{cur_space4}####### {scenario}\n\n"
+                        run_cmd = mlperf_inference_run_command(spaces+20, model, implementation, framework.lower(), category.lower(), scenario, device.lower(), "valid")
+                        content += run_cmd
+                        content += run_suffix
+                      content += f"{cur_space3}=== \"All Scenarios\"\n{cur_space4}####### All Scenarios\n\n"
+                      run_cmd = mlperf_inference_run_command(spaces+20, model, implementation, framework.lower(), category.lower(), "All Scenarios", device.lower(), "valid")
+                      content += run_cmd
+                      content += run_suffix
                 else:
                     content += f"{cur_space2}Use the same docker container as for the {model.replace('99.9', '99')} model.\n\n"
-
-                if device.lower() not in [ "cuda" ]:
-                    content += f"{cur_space2}* `--docker_os=ubuntu`: ubuntu and rhel are supported. \n"
-                    content += f"{cur_space2}* `--docker_os_version=20.04`: [20.04, 22.04] are supported for Ubuntu and [8, 9] for RHEL\n"
-
-                content += f"{cur_space2}</details>\n"
-                run_suffix = ""
-                run_suffix += f"\n{cur_space2}    ###### Run Options\n\n"
-                run_suffix += f"{cur_space2}     * Use `--division=closed` to do a closed division submission which includes compliance runs\n\n"
-                run_suffix += f"{cur_space2}     * Use `--rerun` to do a rerun even when a valid run exists\n\n"
-
-                for scenario in scenarios:
-                    cur_space3 = cur_space2 + "    "
-                    content += f"{cur_space2}=== \"{scenario}\"\n{cur_space3}####### {scenario}\n"
-                    run_cmd = mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), scenario, device.lower(), "valid")
-                    content += run_cmd
-                    content += run_suffix
-
-                content += f"{cur_space2}=== \"All Scenarios\"\n{cur_space3}####### All Scenarios\n"
-                run_cmd = mlperf_inference_run_command(spaces+16, model, implementation, framework.lower(), category.lower(), "All Scenarios", device.lower(), "valid")
-                content += run_cmd
-                content += run_suffix
 
         readme_suffix = get_readme_suffix(spaces, model, implementation)
 
@@ -143,6 +158,13 @@ def define_env(env):
             p_range *= num_devices
 
         return p_range
+    def get_venv_command(spaces):
+     pre_space = " "*spaces
+     return f"""\n
+{pre_space}```bash
+{pre_space}cm run script --tags=\"install python-venv\" --name=mlperf
+{pre_space}export CM_SCRIPT_EXTRA_CMD=\"--adr.python.name=mlperf\"
+{pre_space}```\n"""   
 
     def get_readme_suffix(spaces, model, implementation):
         readme_suffix = ""
