@@ -245,7 +245,7 @@ MODEL_CONFIG = {
             "llama2-70b-99": ["Server", "Offline"],
             "llama2-70b-99.9": ["Server", "Offline"],
             "stable-diffusion-xl": ["SingleStream", "Offline", "Server"],
-            "mixtral-8x7b": ["SingleStream""Server", "Offline"]
+            "mixtral-8x7b": ["SingleStream", "Server", "Offline"]
         },
         "optional-scenarios-datacenter-edge": {},
         "accuracy-target": {
@@ -262,14 +262,13 @@ MODEL_CONFIG = {
             "llama2-70b-99" : ("ROUGE1", 44.4312 * 0.99, "ROUGE2", 22.0352 * 0.99, "ROUGEL", 28.6162 * 0.99, "TOKENS_PER_SAMPLE", 294.45*0.9),
             "llama2-70b-99.9" : ("ROUGE1", 44.4312 * 0.999, "ROUGE2", 22.0352 * 0.999, "ROUGEL", 28.6162 * 0.999, "TOKENS_PER_SAMPLE", 294.45*0.9),
             "stable-diffusion-xl": ("CLIP_SCORE", 31.68631873, "FID_SCORE", 23.01085758),
-            # TODO: Mixtral metrics
-            # "mixtral-8x7b" : ("ROUGE1", X * 0.99, "ROUGE2", X * 0.99, "ROUGEL", X * 0.99, "TOKENS_PER_SAMPLE", X * 0.9, "gsm8k_accuracy": 73.78*0.99, "mbxp_accuracy": 60.12 * 0.99),
+            "mixtral-8x7b" : ("ROUGE1", 45.4911 * 0.99, "ROUGE2", 23.2829 * 0.99, "ROUGEL", 30.3615 * 0.99, "TOKENS_PER_SAMPLE", 145.9 * 0.9, "gsm8k_accuracy", 73.78*0.99, "mbxp_accuracy", 60.12 * 0.99),
         },
         "accuracy-upper-limit": {
             "stable-diffusion-xl": ("CLIP_SCORE", 31.81331801, "FID_SCORE", 23.95007626),
             "llama2-70b-99" : ("TOKENS_PER_SAMPLE", 294.45*1.1),
-            "llama2-70b-99.9" : ("TOKENS_PER_SAMPLE", 294.45*1.1)
-            # "mixtral-8x7b" :("TOKENS_PER_SAMPLE", X * 0.9)
+            "llama2-70b-99.9" : ("TOKENS_PER_SAMPLE", 294.45*1.1),
+            "mixtral-8x7b" : ("TOKENS_PER_SAMPLE", 145.9 * 1.1)
         },
         "performance-sample-count": {
             "resnet": 1024,
@@ -515,12 +514,12 @@ LLM_LATENCY_LIMITS = {
             "tpot": 200 * 1000000
         }
     },
-    # "mixtral-8x7b":{
-    #     "conversational": {
-    #         "ttft": 2000 * 1000000,
-    #         "tpot": 200 * 1000000
-    #     }
-    # }
+    "mixtral-8x7b":{
+        "conversational": {
+            "ttft": 2000 * 1000000,
+            "tpot": 200 * 1000000
+        }
+    }
 }
 
 ACC_PATTERN = {
@@ -539,6 +538,8 @@ ACC_PATTERN = {
     "TOKENS_PER_SAMPLE": r".*'tokens_per_sample':\s([\d.]+).*",
     "CLIP_SCORE": r".*'CLIP_SCORE':\s([\d.]+).*",
     "FID_SCORE": r".*'FID_SCORE':\s([\d.]+).*",
+    "gsm8k_accuracy": r"'gsm8k':\s([\d.]+).*",
+    "mbxp_accuracy": r"'mbxp':\s([\d.]+).*",
 }
 
 SYSTEM_DESC_REQUIRED_FIELDS = [
@@ -783,7 +784,7 @@ def get_args():
     parser.add_argument("--input", required=True, help="submission directory")
     parser.add_argument(
         "--version",
-        default="v4.0",
+        default="v4.1",
         choices=list(MODEL_CONFIG.keys()),
         help="mlperf version",
     )
@@ -829,6 +830,11 @@ def get_args():
         "--skip-extra-files-in-root-check",
         action="store_true",
         help="skips the check of extra files inside the root submission dir",
+    )
+    parser.add_argument(
+        "--scenarios-to-skip",
+        help="Delimited list input of scenarios to skip. i.e. if you only have Offline results, pass in 'Server'",
+        type=str
     )
     args = parser.parse_args()
     return args
@@ -1459,6 +1465,7 @@ def check_results_dir(
     skip_empty_files_check=False,
     skip_check_power_measure_files=False,
     skip_extra_files_in_root_check=False,
+    scenarios_to_skip=[]
 ):
     """
     Walk the results directory and do the checking.
@@ -1859,6 +1866,10 @@ def check_results_dir(
                         # some submissions in v0.5 use lower case scenarios - map them for now
                         scenario_fixed = SCENARIO_MAPPING.get(scenario, scenario)
 
+                        # Skip scenario for debug purposes
+                        if scenario in scenarios_to_skip:
+                            continue
+
                         # we are looking at ./$division/$submitter/results/$system_desc/$model/$scenario,
                         #   ie ./closed/mlperf_org/results/t4-ort/bert/Offline
                         name = os.path.join(
@@ -1940,7 +1951,7 @@ def check_results_dir(
                             )
                             errors += 1
                             continue
-                        else:
+                        elif scenario not in scenarios_to_skip:
                             diff = files_diff(list_files(acc_path), REQUIRED_ACC_FILES)
                             if diff:
                                 log.error(
@@ -2104,6 +2115,8 @@ def check_results_dir(
                         # check if compliance dir is good for CLOSED division
                         compliance = 0 if is_closed_or_network else 1
                         if is_closed_or_network and not skip_compliance:
+                            if scenario in scenarios_to_skip:
+                                continue
                             compliance_dir = os.path.join(
                                 division,
                                 submitter,
@@ -2153,6 +2166,10 @@ def check_results_dir(
                             else:
                                 results[name] = None
                                 log.error("%s is OK but accuracy has issues", name)
+
+                    # Discard scenarios that we want to skip
+                    for scenario in scenarios_to_skip:
+                        required_scenarios.discard(scenario)
 
                     if required_scenarios:
                         name = os.path.join(results_path, system_desc, model_name)
@@ -2539,6 +2556,7 @@ def check_compliance_dir(
         "gptj-99.9",
         "llama2-70b-99",
         "llama2-70b-99.9",
+        "stable-diffusion-xl",
         "mixtral-8x7b"
     ]:
         test_list.remove("TEST04")
@@ -2548,7 +2566,7 @@ def check_compliance_dir(
         "gptj-99.9",
         "llama2-70b-99",
         "llama2-70b-99.9",
-        "stable-diffusion-xl"
+        "stable-diffusion-xl",
         "mixtral-8x7b"
     ]:
         test_list.remove("TEST05")
@@ -2627,6 +2645,13 @@ def main():
         skip_power_check=args.skip_power_check,
     )
 
+    if args.scenarios_to_skip:
+        scenarios_to_skip = [
+            scenario for scenario in args.scenarios_to_skip.split(',')
+        ]
+    else:
+        scenarios_to_skip = []
+
     with open(args.csv, "w") as csv:
         os.chdir(args.input)
         # check results directory
@@ -2639,7 +2664,8 @@ def main():
             args.skip_meaningful_fields_emptiness_check,
             args.skip_empty_files_check,
             args.skip_check_power_measure_files,
-            args.skip_extra_files_in_root_check
+            args.skip_extra_files_in_root_check,
+            scenarios_to_skip
         )
 
     # log results

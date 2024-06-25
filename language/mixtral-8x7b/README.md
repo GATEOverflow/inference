@@ -65,14 +65,27 @@ CPU-only setup, as well as any GPU versions for applicable libraries like PyTorc
 
 
 ## Get Model
-### MLCommons Members Download
 
-TODO: Create MLCommons get fixed link.
-For now it can be downloaded from [Hugging Face](https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1/tree/main)
+### Checkpoint
+
+#### Using Rclone
+
+To run Rclone on Windows, you can download the executable [here](https://rclone.org/install/#windows).
+To install Rclone on Linux/macOS/BSD systems, run:
+```
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
+```
+Once Rclone is installed, run the following command to authenticate with the bucket:
+```
+rclone config create mlc-inference s3 provider=Cloudflare access_key_id=f65ba5eef400db161ea49967de89f47b secret_access_key=fbea333914c292b854f14d3fe232bad6c5407bf0ab1bebf78833c2b359bdfd2b endpoint=https://c2686074cb2caf5cbaf6d134bdba8b47.r2.cloudflarestorage.com
+```
+You can then navigate in the terminal to your desired download directory and run the following command to download the model checkpoint:
+
+```
+rclone copy mlc-inference:mlcommons-inference-wg-public/mixtral_8x7b/mixtral-8x7b-instruct-v0.1 ./mixtral-8x7b-instruct-v0.1 -P
+```
 
 ## Get Dataset
-
-TODO: Create scripts and procedure to download all of the parts of the dataset
 
 ### Preprocessed
 
@@ -109,9 +122,6 @@ Alternatively, you can simply cd into the folder where you want to place the dat
 ```bash
 wget https://inference.mlcommons-storage.org/mixtral_8x7b%2F2024.06.06_mixtral_15k_calibration_v4.pkl
 ```
-### Unprocessed
-
-TODO: Share instructions and scripts
 
 ## Run Performance Benchmarks
 
@@ -247,15 +257,15 @@ python -u evaluate-accuracy.py --checkpoint-path mistralai/Mixtral-8x7B-instruct
 Reference scores:
 Open Orca:
 ```json
-{'rouge1': 45.4911, 'rouge2': 23.2829, 'rougeL': 30.3615, 'rougeLsum': 42.4333}
+{'rouge1': 45.4911, 'rouge2': 23.2829, 'rougeL': 30.3615}
 ```
 GSM8K:
 ```json
-{'gsm8k_accuracy': 73.78}
+{'gsm8k': 73.78}
 ```
 MBXP:
 ```json
-{'mbxp_accuracy': 60.16}
+{'mbxp': 60.16}
 ```
 For official submissions, 99% of each reference score is enforced. Additionally, 90%-110% of the generated tokens_per_samples:
 ```json
