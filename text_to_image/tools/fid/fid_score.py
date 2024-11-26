@@ -32,7 +32,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from inception import InceptionV3
 from torch.nn.functional import adaptive_avg_pool2d
 from scipy import linalg
 from PIL import Image
@@ -45,8 +44,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 import pathlib
 import os
 import sys
-
-sys.path.append(os.path.dirname(__file__))
+from .inception import InceptionV3
 
 
 try:

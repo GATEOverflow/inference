@@ -79,7 +79,7 @@ def main():
     df["p#"] = df.apply(lambda x: int(x["host_processors_per_node"]), axis=1)
 
     # details url
-    base_url = f"https://github.com/mlcommons/{args.repository}/tree/main"
+    base_url = f"https://github.com/{args.repository_owner}/{args.repository}/tree/{args.repository_branch}"
     df["Details"] = df.apply(
         lambda x: '=HYPERLINK("{}","details")'.format(
             "/".join(
@@ -201,6 +201,7 @@ def main():
             df = df[value(df[key])]
         if df.size == 0:
             return
+
         json_df = df.to_json(orient="records")
         outjsondata += json.loads(json_df)
 
@@ -328,6 +329,7 @@ def main():
                    for key in keystomatch):
                 # print(result)
                 # print(outjsondata[i+1])
+
                 if "Watts" in result["Units"] or "joules" in result["Units"]:
                     result["Performance_Result"] = outjsondata[i + 1]["Result"]
                     result["Performance_Units"] = outjsondata[i + 1]["Units"]

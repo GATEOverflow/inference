@@ -17,9 +17,10 @@ jobs:
     if: github.repository_owner == 'mlcommons'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       # Check if VERSION.txt file has changed in this push
       - name: Check if VERSION.txt file has changed
@@ -88,7 +89,7 @@ jobs:
 
        # Save wheels as artifacts
       - name: Upload built wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
           path: wheels
@@ -105,19 +106,19 @@ jobs:
 
       # Download the built wheels from ubuntu
       - name: Download Ubuntu wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels-ubuntu-latest
           path: wheels
       # Download the built wheels from macOS
       - name: Download macOS wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels-macos-latest
           path: wheels
       # Download the built wheels from Windows
       - name: Download Windows wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels-windows-latest
           path: wheels
