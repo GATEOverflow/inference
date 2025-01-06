@@ -12,7 +12,7 @@ hide:
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 ```mermaid
 flowchart LR
-    subgraph "Submission Generation"
+    subgraph Generation
       direction TB
       B --> C[truncate-accuracy-logs]
       C --> D{Infer low talency results and/or filter out invalid results}
@@ -22,7 +22,7 @@ flowchart LR
       F --> G[Submission TAR file]
       G --> H[Upload to Submission Server]
     end
-    Input((MLPerf Inference Results folder)) --> "Submission Generation"
+    Input((MLPerf Inference Results folder)) --> Generation
 ```
 
 
