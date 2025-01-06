@@ -17,7 +17,7 @@ flowchart TD
     B -.-> D[preprocess-mlperf-inference-submission (optional)]
     D -.-> C
     C --> E[Submission TAR file]
-```
+
 Click [here](https://youtu.be/eI1Hoecc3ho) to view the recording of the workshop: Streamlining your MLPerf Inference results using CM.
 
 Click [here](https://docs.google.com/presentation/d/1cmbpZUpVr78EIrhzyMBnnWnjJrD-mZ2vmSb-yETkTA8/edit?usp=sharing) to view the prposal slide for Common Automation for MLPerf Inference Submission Generation through CM.
