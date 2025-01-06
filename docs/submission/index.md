@@ -29,7 +29,7 @@ flowchart LR
     C --> E[Submission TAR file]
 
     %% Subgraph for preprocess (Top to Down)
-    subgraph Optional_Preprocessing
+    subgraph Optional_Preprocessing one
         direction TD
         D --> C
     end
