@@ -13,7 +13,7 @@ hide:
 ```mermaid
 flowchart LR
     classDef hidden fill:none,stroke:none;
-    subgraph Generation
+    subgraph "Submission Generation"
       direction TB
       A[populate system details] --> B[generate submission structure]
       B --> C[truncate-accuracy-logs]
@@ -22,8 +22,8 @@ flowchart LR
       D --> no --> F[run-mlperf-inference-submission-checker]
       E --> F
     end
-    Input((MLPerf Inference Results folder)) --> Generation
-    Generation --  Submission TAR file --> H[Upload to Submission Server]
+    Input((MLPerf Inference Results folder)) --> "Submission Generation"
+    "Submission Generation" --  Submission TAR file --> H[Upload to Submission Server]
     H --> Output((Receive validation email))
 ```
 
