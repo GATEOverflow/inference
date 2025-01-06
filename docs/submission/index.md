@@ -12,7 +12,6 @@ hide:
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 ```mermaid
 flowchart LR
-    classDef hidden fill:none,stroke:none;
     subgraph Generation [Submission Generation]
       direction TB
       A[populate system details] --> B[generate submission structure]
@@ -22,9 +21,8 @@ flowchart LR
       D --> no --> F[run-mlperf-inference-submission-checker]
       E --> F
     end
-    Input((MLPerf Inference Results folder)) --> Generation
-    Generation --  Submission TAR file --> H[Upload to Submission Server]
-    H --> Output((Receive validation email))
+    Input((MLPerf Inference Results SUT1)) --> Generation
+    Generation --> Output((Submission Folder SUT1))
 ```
 
 
