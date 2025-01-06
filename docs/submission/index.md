@@ -11,8 +11,8 @@ hide:
 
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 ```mermaid
-flowchart LR
-    subgraph Generation
+flowchart LR "SSE"
+    subgraph Generation "SSS"
       direction TB
       B --> C[truncate-accuracy-logs]
       C --> D{Infer low talency results and/or filter out invalid results}
