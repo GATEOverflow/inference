@@ -16,7 +16,7 @@ flowchart TD
     B --> C [truncate-accuracy-logs]
     C --> D[run-mlperf-inference-submission-checker]
     C -.-> E[preprocess-mlperf-inference-submission]
-    E -.-> D
+    E -.-> D [H]
     D --> F[Submission TAR file]
     F --> G[Upload to Submission Server]
 ```
