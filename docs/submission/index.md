@@ -38,9 +38,10 @@ flowchart LR
     
 ```
 ```mermaid
-flowchart TB
+flowchart LR
     c1-->a2
     subgraph one
+    direction TD
     a1-->a2
     end
     subgraph two
