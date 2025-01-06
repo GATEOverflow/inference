@@ -31,7 +31,7 @@ flowchart LR
 
     %% Subgraph for preprocess (Top to Down)
     subgraph Optional_Preprocessing
-        direction TD
+        direction TB
         D[preprocess-mlperf-inference-submission] --> C
     End
 
