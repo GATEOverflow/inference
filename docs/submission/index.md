@@ -11,7 +11,7 @@ hide:
 
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 ```mermaid
-flowchart TD
+flowchart LR
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[truncate-accuracy-logs]
     C --> D[run-mlperf-inference-submission-checker]
