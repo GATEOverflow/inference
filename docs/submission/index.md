@@ -15,13 +15,13 @@ flowchart LR
     Input((MLPerf Inference Results folder)) --> B[generate-mlperf-inference-submission]
     subgraph generation
       direction TB
-    B --> C[truncate-accuracy-logs]
-    C --> D{Infer low talency results and/or filter out invalid results}
-    D --> yes --> E[preprocess-mlperf-inference-submission]
-    D --> no --> F[run-mlperf-inference-submission-checker]
-    E --> F
-    F --> G[Submission TAR file]
-    G --> H[Upload to Submission Server]
+      B --> C[truncate-accuracy-logs]
+      C --> D{Infer low talency results and/or filter out invalid results}
+      D --> yes --> E[preprocess-mlperf-inference-submission]
+      D --> no --> F[run-mlperf-inference-submission-checker]
+      E --> F
+      F --> G[Submission TAR file]
+      G --> H[Upload to Submission Server]
     end
 ```
 
