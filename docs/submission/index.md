@@ -31,7 +31,7 @@ flowchart LR
     %% Subgraph for preprocess (Top to Down)
     subgraph Optional_Preprocessing[Optional Preprocessing]
         direction TD
-        D["preprocess-mlperf-inference-submission (optional)"] --> C
+        D[preprocess-mlperf-inference-submission] --> C
     end
 
     %% Dashed line to connect preprocess node
