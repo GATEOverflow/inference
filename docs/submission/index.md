@@ -41,7 +41,7 @@ flowchart LR
 flowchart LR
     c1-->a2
     subgraph one
-    direction TD
+    direction TB
     a1-->a2
     end
     subgraph two
