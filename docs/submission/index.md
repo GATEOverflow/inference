@@ -15,7 +15,8 @@ flowchart LR
     classDef hidden fill:none,stroke:none;
     subgraph Generation
       direction TB
-      C[truncate-accuracy-logs] --> D{Infer low talency results and/or filter out invalid results}
+      B[populate system details] --> C[truncate-accuracy-logs]
+      C --> D{Infer low talency results and/or filter out invalid results}
       D --> yes --> E[preprocess-mlperf-inference-submission]
       D --> no --> F[run-mlperf-inference-submission-checker]
       E --> F
