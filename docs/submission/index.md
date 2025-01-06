@@ -22,6 +22,7 @@ flowchart LR
     end
     Input((MLPerf Inference Results folder)) --> Generation
     Generation --  Submission TAR file --> H[Upload to Submission Server]
+    H --> Output((LO))
     H -- Receive validation email --> O[ ]:::hidden
 ```
 
