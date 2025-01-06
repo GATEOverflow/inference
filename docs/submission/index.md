@@ -22,22 +22,7 @@ flowchart TB
     G --> H[Upload to Submission Server]
 ```
 
-```mermaid
-flowchart LR
-    %% Main flow (Left to Right)
-    A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
-    B --> C[run-mlperf-inference-submission-checker]
-    C --> E[Submission TAR file]
-    B -.-> D
 
-    %% Subgraph for preprocess (Top to Down)
-    subgraph Optional_Preprocessing
-        direction TB
-        D[preprocess-mlperf-inference-submission] --> C
-    end
-
-    
-```
 
 Click [here](https://youtu.be/eI1Hoecc3ho) to view the recording of the workshop: Streamlining your MLPerf Inference results using CM.
 
