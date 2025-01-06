@@ -16,9 +16,10 @@ flowchart TB
     B --> C[truncate-accuracy-logs]
     C --> D{Infer low talency results and/or filter out invalid results}
     D --> yes --> E[preprocess-mlperf-inference-submission]
-    D --> no --> E[run-mlperf-inference-submission-checker]
-    E --> F[Submission TAR file]
-    F --> G[Upload to Submission Server]
+    D --> no --> F[run-mlperf-inference-submission-checker]
+    E --> F
+    F --> G[Submission TAR file]
+    G --> H[Upload to Submission Server]
 ```
 
 ```mermaid
