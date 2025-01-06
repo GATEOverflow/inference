@@ -13,10 +13,10 @@ hide:
 ```mermaid
 flowchart TD
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
-    B --> C [truncate-accuracy-logs]
+    B --> C[truncate-accuracy-logs]
     C --> D[run-mlperf-inference-submission-checker]
     C -.-> E[preprocess-mlperf-inference-submission]
-    E -.-> D [H]
+    E -.-> D
     D --> F[Submission TAR file]
     F --> G[Upload to Submission Server]
 ```
