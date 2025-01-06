@@ -15,7 +15,7 @@ flowchart TD
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[truncate-accuracy-logs]
     C --> D[run-mlperf-inference-submission-checker]
-    C -.-> E[preprocess-mlperf-inference-submission]
+    C -.-> E["preprocess-mlperf-inference-submission (Optional)"]
     E -.-> D
     D --> F[Submission TAR file]
     F --> G[Upload to Submission Server]
