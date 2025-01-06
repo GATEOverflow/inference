@@ -27,6 +27,7 @@ flowchart LR
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[run-mlperf-inference-submission-checker]
     C --> E[Submission TAR file]
+    C --> D
 
     %% Subgraph for preprocess (Top to Down)
     subgraph Optional_Preprocessing one
