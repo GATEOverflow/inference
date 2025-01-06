@@ -20,8 +20,8 @@ flowchart LR
       E --> F
     end
     Input((MLPerf Inference Results folder)) --> Generation
-    Generation --  "Submission TAR file" --> H[Upload to Submission Server]
-    H -> O[ ]:::hidden
+    Generation --  Submission TAR file --> H[Upload to Submission Server]
+    H -> O[  ]:::hidden
 ```
 
 
