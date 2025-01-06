@@ -13,7 +13,7 @@ hide:
 ```mermaid
 flowchart LR
     Input((MLPerf Inference Results folder)) --> B[generate-mlperf-inference-submission]
-    subgrap generation
+    subgraph generation
     direction TB
     B --> C[truncate-accuracy-logs]
     C --> D{Infer low talency results and/or filter out invalid results}
