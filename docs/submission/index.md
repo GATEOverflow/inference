@@ -18,9 +18,9 @@ flowchart LR
       D --> yes --> E[preprocess-mlperf-inference-submission]
       D --> no --> F[run-mlperf-inference-submission-checker]
       E --> F
-      F --  "Submission TAR file" --> H[Upload to Submission Server]
     end
     Input((MLPerf Inference Results folder)) --> Generation
+    Generation --  "Submission TAR file" --> H[Upload to Submission Server]
 ```
 
 
