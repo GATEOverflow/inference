@@ -27,16 +27,15 @@ flowchart LR
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[run-mlperf-inference-submission-checker]
     C --> E[Submission TAR file]
-    C --> D
+    B -.-> D
 
     %% Subgraph for preprocess (Top to Down)
-    subgraph Optional_Preprocessing one
+    subgraph Optional_Preprocessing
         direction TD
-        D --> C
+        D[preprocess-mlperf-inference-submission] --> C
     end
 
-    %% Dashed line to connect preprocess node
-    B -.-> D
+    
 ```
 Click [here](https://youtu.be/eI1Hoecc3ho) to view the recording of the workshop: Streamlining your MLPerf Inference results using CM.
 
