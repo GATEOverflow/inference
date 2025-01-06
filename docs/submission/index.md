@@ -29,9 +29,7 @@ flowchart LR
     C --> E[Submission TAR file]
 
     %% Subgraph for preprocess (Top to Down)
-    subgraph Optional_Preprocessing[Optional Preprocessing]
-        direction TD
-
+    subgraph Optional_Preprocessing[Optional Preprocessing] direction TD
         D[preprocess-mlperf-inference-submission] --> C
     end
 
