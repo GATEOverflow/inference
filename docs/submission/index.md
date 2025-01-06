@@ -12,6 +12,7 @@ hide:
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 ```mermaid
 flowchart TB
+    Input((Input)) --> A[MLPerf Inference Results folder]
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[truncate-accuracy-logs]
     C --> D{Infer low talency results and/or filter out invalid results}
