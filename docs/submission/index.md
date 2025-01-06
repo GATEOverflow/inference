@@ -8,14 +8,14 @@ hide:
 </p>
 
 <p align="center"><em>Figure: MLPerf Inference Submission Generation Flow</em></p>
-
+```mermaid
 flowchart TD
     A[MLPerf Inference Results folder] --> B[generate-mlperf-inference-submission]
     B --> C[run-mlperf-inference-submission-checker]
     B -.-> D[preprocess-mlperf-inference-submission (optional)]
     D -.-> C
     C --> E[Submission TAR file]
-
+```
 <!--![Submission Generation Flow](../img/submission-flow.png)-->
 
 Click [here](https://youtu.be/eI1Hoecc3ho) to view the recording of the workshop: Streamlining your MLPerf Inference results using CM.
