@@ -5,7 +5,6 @@ on:
       branch:
         description: 'Branch to reset (leave blank for current branch)'
         required: false
-        default: 'dev'
 
 jobs:
   reset-branch:
